@@ -9,6 +9,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.example.background.KEY_IMAGE_URI
+import timber.log.Timber
 
 private const val TAG = "BlurWorker"
 class BlurWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
@@ -19,9 +20,11 @@ class BlurWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
 
         makeStatusNotification("Blurring image", appContext)
 
+        sleep()
+
         return try {
             if (TextUtils.isEmpty(resourceUri)) {
-                Log.e(TAG, "Invalid input uri")
+                Timber.e("Invalid input uri")
                 throw IllegalArgumentException("Invalid input uri")
             }
 
@@ -34,11 +37,11 @@ class BlurWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
 
             // Write bitmap to a temp file
             val outputUri = writeBitmapToFile(appContext, output)
+
             val outputData = workDataOf(KEY_IMAGE_URI to outputUri.toString())
 
             Result.success(outputData)
         } catch (throwable: Throwable) {
-            Log.e(TAG, "Error applying blur")
             throwable.printStackTrace()
             Result.failure()
         }
